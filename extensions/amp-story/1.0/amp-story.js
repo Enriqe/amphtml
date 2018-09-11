@@ -438,8 +438,9 @@ export class AmpStory extends AMP.BaseElement {
       }, this.element);
 
       if (btnContainer) {
-        this.paginationButtons_.handleClick(btnContainer);
         event.stopPropagation();
+        event.preventDefault();
+        this.paginationButtons_.handleClick(btnContainer);
       }
     });
 
