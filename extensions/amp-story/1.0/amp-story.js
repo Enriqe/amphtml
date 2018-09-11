@@ -430,6 +430,19 @@ export class AmpStory extends AMP.BaseElement {
       this.performTapNavigation_(direction);
     });
 
+    this.element.addEventListener('click', event => {
+      const target = dev().assertElement(event.target);
+
+      const btnContainer = closest(target, el => {
+        return el.classList.contains('i-amphtml-story-button-container');
+      }, this.element);
+
+      if (btnContainer) {
+        this.paginationButtons_.handleClick(btnContainer);
+        event.stopPropagation();
+      }
+    });
+
     this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
       this.onAdStateUpdate_(isAd);
     });

@@ -109,8 +109,6 @@ class PaginationButton {
 
     this.element.classList.add(initialState.className);
 
-    this.element.addEventListener('click', e => this.onClick_(e));
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
   }
@@ -126,11 +124,9 @@ class PaginationButton {
   }
 
   /**
-   * @param {!Event} e
-   * @private
+   * Handles click event coming from amp-story.
    */
-  onClick_(e) {
-    e.preventDefault();
+  onClick() {
     if (this.state_.triggers) {
       dispatch(this.element, dev().assert(this.state_.triggers),
           /* opt_bubbles */ true);
@@ -181,6 +177,17 @@ export class PaginationButtons {
 
     element.appendChild(this.forwardButton_.element);
     element.appendChild(this.backButton_.element);
+  }
+
+  /**
+   * @param {!Element} target
+   */
+  handleClick(target) {
+    if (target == this.forwardButton_.element) {
+      this.forwardButton_.onClick();
+    } else if (target == this.backButton_.element) {
+      this.backButton_.onClick();
+    }
   }
 
   /** @param {!./navigation-state.StateChangeEventDef} event */
