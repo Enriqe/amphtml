@@ -82,15 +82,17 @@
   float: left !important;
 }
 
+ol.i-amphtml-animate-progress li {
+  transition: transform 1s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
 .i-amphtml-story-progress-bar {
   border: 0 !important;
   display: flex !important;
   height: 2px !important;
-  left: 0 !important;
   margin: 4px 0 0 !important;
-  padding: 0 2px !important;
+  padding: 0 !important;
   position: absolute !important;
-  right: 0 !important;
   top: 0 !important;
   visibility: visible !important;
   z-index: 100001 !important;
@@ -104,10 +106,16 @@
   background: rgba(255, 255, 255, 0.4) !important;
   border-radius: 1px !important;
   height: 100% !important;
-  list-style-type: none !important;
-  margin: 0 2px!important;
-  overflow: hidden!important;
-  width: 100% !important;
+  list-style: none !important;
+  margin: 0 2px !important;
+  overflow: hidden !important;
+  width: 3px !important;
+  position: absolute !important;
+  transform-origin: left !important;
+}
+
+[dir=rtl] .i-amphtml-story-page-progress-bar {
+  transform-origin: right !important;
 }
 
 .i-amphtml-story-page-progress-value {

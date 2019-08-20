@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {EventType} from './events';
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
@@ -36,13 +37,40 @@ const TRANSITION_LINEAR = `transform ${POLL_INTERVAL_MS}ms linear`;
 const TRANSITION_EASE = 'transform 200ms ease';
 
 /**
+ * Size in pixels of a segment ellipse.
+ * @const {number}
+ */
+const ELLIPSE_WIDTH_PX = 3;
+
+/**
+ * Size in pixels of the total side margins of a segment.
+ * @const {number}
+ */
+const SEGMENTS_MARGIN_PX = 4;
+
+/**
+ * Maximum number of segments that can be shown at a time before collapsing
+ * into ellipsis.
+ * @const {number}
+ */
+const MAX_SEGMENTS = 20;
+
+/**
+ * Number of segments we introduce to the bar as we pass an overflow point
+ * (when user reaches ellipsis).
+ * @const {number}
+ */
+const SEGMENT_INCREMENT = 5;
+
+/**
  * Progress bar for <amp-story>.
  */
 export class ProgressBar {
   /**
    * @param {!Window} win
+   * @param {!Element} storyEl
    */
-  constructor(win) {
+  constructor(win, storyEl) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -72,14 +100,38 @@ export class ProgressBar {
 
     /** @private {string} */
     this.activeSegmentId_ = '';
+
+    /** @private {!Array<!Element>} */
+    this.segments_ = [];
+
+    /**
+     * Index next to first ellipsis.
+     * @private {number}
+     */
+    this.progressBarIndex_ = 0;
+
+    /**
+     * Width of the progress bar in pixels.
+     * @private {number}
+     */
+    this.barWidthPx_ = 0;
+
+    /** @private {number} */
+    this.increment_ = 0;
+
+    /** @private {!Element} */
+    this.storyEl_ = storyEl;
+
+    this.timer_ = Services.timerFor(this.win_);
   }
 
   /**
    * @param {!Window} win
+   * @param {!Element} storyEl
    * @return {!ProgressBar}
    */
-  static create(win) {
-    return new ProgressBar(win);
+  static create(win, storyEl) {
+    return new ProgressBar(win, storyEl);
   }
 
   /**
@@ -94,6 +146,9 @@ export class ProgressBar {
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
+    this.storyEl_.addEventListener(EventType.REPLAY, () => {
+      this.replay_();
+    });
 
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
@@ -119,8 +174,152 @@ export class ProgressBar {
       true /** callToInitialize */
     );
 
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      rtlState => {
+        this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.barWidthPx_ = this.storyEl_
+      .querySelector('amp-story-page')
+      .getBoundingClientRect().width;
+
+    // Don't animate the progress bar in pageload.
+    this.timer_.delay(() => {
+      this.root_.classList.add('i-amphtml-animate-progress');
+    }, 1);
+
     this.isBuilt_ = true;
     return this.getRoot();
+  }
+
+  /**
+   * Reacts to story replay.
+   * @private
+   */
+  replay_() {
+    this.progressBarIndex_ = 0;
+    this.render_();
+  }
+
+  /**
+   * Renders the segments by setting their corresponding width and translate.
+   * @private
+   */
+  render_() {
+    const segmentWidth = this.getSegmentWidth_();
+
+    // Cursor starts with the left most segment in the screen.
+    let cursor =
+      -(this.progressBarIndex_ - this.getPrevDotsCount_()) *
+      (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
+
+    for (let i = 0; i < this.segments_.length; i++) {
+      const width =
+        i >= this.progressBarIndex_ && i < this.progressBarIndex_ + MAX_SEGMENTS
+          ? segmentWidth
+          : ELLIPSE_WIDTH_PX;
+      this.transform_(this.segments_[i], cursor, width);
+      cursor += width + SEGMENTS_MARGIN_PX;
+    }
+  }
+
+  /**
+   * Applies transform to a segment.
+   * @param {!Element} segment
+   * @param {number} cursor
+   * @param {number} width
+   * @private
+   */
+  transform_(segment, cursor, width) {
+    if (this.storeService_.get(StateProperty.RTL_STATE)) {
+      cursor *= -1;
+    }
+    segment.setAttribute(
+      'style',
+      `transform: translate3d(${cursor}px, 0, 0) scaleX(${width /
+        ELLIPSE_WIDTH_PX});`
+    );
+  }
+
+  /**
+   * Gets the individual segment width.
+   * @return {number}
+   * @private
+   */
+  getSegmentWidth_() {
+    const nextDotsCount = this.getNextDotsCount_();
+    const prevDotsCount = this.getPrevDotsCount_();
+    const dotsZoneWidth =
+      (nextDotsCount + prevDotsCount) * (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
+    const segmentsZoneWidth = this.barWidthPx_ - dotsZoneWidth;
+
+    return (
+      segmentsZoneWidth / Math.min(this.segmentCount_, MAX_SEGMENTS) -
+      SEGMENTS_MARGIN_PX
+    );
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getNextDotsCount_() {
+    const nextPagesCount =
+      this.segments_.length - (this.progressBarIndex_ + MAX_SEGMENTS);
+    return nextPagesCount > 3 ? 3 : Math.max(nextPagesCount, 0);
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getPrevDotsCount_() {
+    return this.progressBarIndex_ > 3
+      ? 3
+      : Math.min(this.increment_, this.progressBarIndex_);
+  }
+
+  /**
+   * Checks if an index is past the MAX_SEGMENTS limit and updates the progress
+   * bar accordingly.
+   * @private
+   */
+  checkIndexForOverflow_() {
+    if (this.activeSegmentIndex_ >= this.progressBarIndex_ + MAX_SEGMENTS) {
+      const nextLimit =
+        this.progressBarIndex_ + MAX_SEGMENTS + SEGMENT_INCREMENT - 1;
+      this.increment_ =
+        nextLimit < this.segmentCount_
+          ? SEGMENT_INCREMENT
+          : this.segmentCount_ - (this.progressBarIndex_ + MAX_SEGMENTS);
+      this.progressBarIndex_ += this.increment_;
+
+      this.render_();
+    } else if (this.activeSegmentIndex_ < this.progressBarIndex_) {
+      this.increment_ =
+        this.progressBarIndex_ - SEGMENT_INCREMENT < 0
+          ? this.progressBarIndex_
+          : SEGMENT_INCREMENT;
+      this.progressBarIndex_ -= this.increment_;
+
+      this.render_();
+    }
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.vsync_.mutate(() => {
+      rtlState
+        ? this.getRoot().setAttribute('dir', 'rtl')
+        : this.getRoot().removeAttribute('dir');
+    });
   }
 
   /**
@@ -135,6 +334,7 @@ export class ProgressBar {
     segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
     segmentProgressBar.appendChild(segmentProgressValue);
     this.root_.appendChild(segmentProgressBar);
+    this.segments_.push(segmentProgressBar);
   }
 
   /**
@@ -193,6 +393,12 @@ export class ProgressBar {
 
     this.updateProgressByIndex_(segmentIndex, progress);
 
+    // If story was reloaded.
+    if (!this.activeSegmentIndex_) {
+      this.updateValuesForReload_(segmentIndex);
+      this.render_();
+    }
+
     // If updating progress for a new segment, update all the other progress
     // bar segments.
     if (this.activeSegmentIndex_ !== segmentIndex || updateAllSegments) {
@@ -207,6 +413,22 @@ export class ProgressBar {
     this.activeSegmentProgress_ = progress;
     this.activeSegmentIndex_ = segmentIndex;
     this.activeSegmentId_ = segmentId;
+    this.checkIndexForOverflow_(segmentIndex);
+  }
+
+  /**
+   * Snap the progressBarIndex to its most appropiate place after reload.
+   * @param {number} segmentIndex
+   */
+  updateValuesForReload_(segmentIndex) {
+    if (
+      segmentIndex > MAX_SEGMENTS &&
+      segmentIndex + MAX_SEGMENTS < this.segmentCount_
+    ) {
+      this.progressBarIndex_ = segmentIndex - (segmentIndex % MAX_SEGMENTS);
+    } else if (segmentIndex > MAX_SEGMENTS) {
+      this.progressBarIndex_ = this.segmentCount_ - MAX_SEGMENTS;
+    }
   }
 
   /**
