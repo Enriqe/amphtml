@@ -1,0 +1,69 @@
+[debug] [2020-03-23T15:24:56.149Z] ----------------------------------------------------------------------
+[debug] [2020-03-23T15:24:56.153Z] Command:       /Users/artezan/.nvm/versions/node/v12.16.1/bin/node /Users/artezan/.nvm/versions/node/v12.16.1/bin/firebase deploy --debug
+[debug] [2020-03-23T15:24:56.154Z] CLI Version:   7.15.1
+[debug] [2020-03-23T15:24:56.154Z] Platform:      darwin
+[debug] [2020-03-23T15:24:56.155Z] Node Version:  v12.16.1
+[debug] [2020-03-23T15:24:56.156Z] Time:          Mon Mar 23 2020 11:24:56 GMT-0400 (Eastern Daylight Time)
+[debug] [2020-03-23T15:24:56.156Z] ----------------------------------------------------------------------
+[debug] [2020-03-23T15:24:56.156Z] 
+[debug] [2020-03-23T15:24:56.164Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2020-03-23T15:24:56.164Z] > authorizing via signed-in user
+[debug] [2020-03-23T15:24:56.164Z] [iam] checking project stamp-demo for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2020-03-23T15:24:56.166Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/stamp-demo:testIamPermissions  
+
+[debug] [2020-03-23T15:24:56.705Z] <<< HTTP RESPONSE 200
+[debug] [2020-03-23T15:24:56.707Z] >>> HTTP REQUEST GET https://firebase.googleapis.com/v1beta1/projects/stamp-demo  
+ 
+[debug] [2020-03-23T15:24:56.990Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Deploying to 'stamp-demo'...
+[info] 
+[info] i  deploying hosting
+[debug] [2020-03-23T15:24:56.993Z] >>> HTTP REQUEST POST https://firebasehosting.googleapis.com/v1beta1/sites/stamp-demo/versions  
+
+[debug] [2020-03-23T15:24:58.409Z] <<< HTTP RESPONSE 200
+[info] i  hosting[stamp-demo]: beginning deploy...
+[info] i  hosting[stamp-demo]: found 2 files in firebase
+[debug] [2020-03-23T15:24:58.416Z] [hosting] hash cache [ZmlyZWJhc2U] not populated
+[debug] [2020-03-23T15:24:58.424Z] [hosting] hash cache [ZmlyZWJhc2U] stored for 2 files
+[debug] [2020-03-23T15:24:58.424Z] [hosting][hash queue][FINAL]
+[debug] [2020-03-23T15:24:58.424Z] >>> HTTP REQUEST POST https://firebasehosting.googleapis.com/v1beta1/sites/stamp-demo/versions/0a27ecfbb9258cf4:populateFiles  
+ <request body omitted>
+[debug] [2020-03-23T15:24:58.918Z] <<< HTTP RESPONSE 200
+[debug] [2020-03-23T15:24:58.919Z] [hosting][populate queue][FINAL]
+[debug] [2020-03-23T15:24:58.919Z] [hosting] uploads queued: 1
+[debug] [2020-03-23T15:25:00.285Z] [hosting][upload queue][FINAL]
+[info] ✔  hosting[stamp-demo]: file upload complete
+[debug] [2020-03-23T15:25:00.286Z] [hosting] deploy completed after 1876ms
+[debug] [2020-03-23T15:25:00.573Z] [
+  {
+    "config": {
+      "public": "firebase",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "site": "stamp-demo"
+    },
+    "site": "stamp-demo",
+    "version": "sites/stamp-demo/versions/0a27ecfbb9258cf4"
+  }
+]
+[info] i  hosting[stamp-demo]: finalizing version...
+[debug] [2020-03-23T15:25:00.573Z] >>> HTTP REQUEST PATCH https://firebasehosting.googleapis.com/v1beta1/sites/stamp-demo/versions/0a27ecfbb9258cf4?updateMask=status  
+
+[debug] [2020-03-23T15:25:01.220Z] <<< HTTP RESPONSE 200
+[debug] [2020-03-23T15:25:01.221Z] [hosting] finalized version for stamp-demo:
+[info] ✔  hosting[stamp-demo]: version finalized
+[info] i  hosting[stamp-demo]: releasing new version...
+[debug] [2020-03-23T15:25:01.221Z] >>> HTTP REQUEST POST https://firebasehosting.googleapis.com/v1beta1/sites/stamp-demo/releases?version_name=sites/stamp-demo/versions/0a27ecfbb9258cf4  
+
+[debug] [2020-03-23T15:25:01.556Z] <<< HTTP RESPONSE 200
+[debug] [2020-03-23T15:25:01.557Z] [hosting] release:
+[info] ✔  hosting[stamp-demo]: release complete
+[info] 
+[info] ✔  Deploy complete!
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/stamp-demo/overview
+[info] Hosting URL: https://stamp-demo.firebaseapp.com
