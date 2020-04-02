@@ -19,6 +19,7 @@
   <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <title>amp-story-grid-layer</title>
@@ -33,6 +34,12 @@
       <amp-story-page id="cover">
         <!-- Invalid: aspect-ratio does not contain a numeric value -->
         <amp-story-grid-layer aspect-ratio="a:b" template="vertical">
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="page1">
+        <amp-story-grid-layer template="vertical">
+          <!-- Invalid: analytics should not be under amp-story-grid-layer -->
+          <amp-analytics></amp-analytics>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>

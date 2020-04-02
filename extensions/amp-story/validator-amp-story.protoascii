@@ -624,7 +624,6 @@ descendant_tag_list: {
   tag: "A"
   tag: "ABBR"
   tag: "ADDRESS"
-  tag: "AMP-ANALYTICS"
   tag: "AMP-AUDIO"
   tag: "AMP-DATE-COUNTDOWN"
   tag: "AMP-EXPERIMENT"
