@@ -31,12 +31,37 @@
         line-height: 1.25;
         text-shadow: 3px 3px #000;
       }
+
+      .close-button {
+        color: white;
+        position: absolute;
+        top: 5px;
+        left: 10px;
+        font-size: 35px;
+        z-index: 999;
+        display: none;
+      }
+
+      .player-open .close-button {
+        display: block;
+      }
+
+      amp-story-player {
+        display: none;
+      }
+
+      .player-open amp-story-player {
+        display: block;
+      }
     </style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   </head>
   <body>
     <h1>This is a NON-AMP page that embeds a story below:</h1>
-    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
-    <amp-story-player style="width: 360px; height: 600px;">
+    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>\
+    <div class="player-trigger">TRIGGER</div>
+    <span class="close-button">&times;</span>
+    <amp-story-player style="width: 100%; height: 100%; position: absolute; left: 0; top: 0;">
         <a href="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/"
             style="--story-player-poster: url('https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/img/promo3x4.jpg');"
             class="story">
@@ -59,5 +84,61 @@
         </a>
     </amp-story-player>
     <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras viverra neque ex, sit amet varius sem maximus sed. Suspendisse potenti. Donec erat purus, sagittis sit amet tincidunt ut, maximus sit amet massa. Maecenas venenatis fringilla dui vitae vestibulum. Fusce imperdiet euismod lobortis. Nullam sagittis nunc at tristique mattis. In sodales consectetur mollis. Maecenas sollicitudin, ex vel tempor rutrum, turpis eros interdum enim, sit amet volutpat tortor dolor at ipsum. Nam posuere velit vel urna vulputate interdum. Aenean eu vulputate lorem. Praesent nec nunc sodales, egestas orci sed, hendrerit mauris. Ut blandit turpis non erat sagittis, quis fermentum odio feugiat.</div>
+    <script>
+      let playerEl, iframeEl = null;
+
+      function getPlayer() {
+        if (playerEl) {
+          return playerEl;
+        }
+        return document.getElementsByTagName('amp-story-player')[0];
+      }
+
+      function getIframe() {
+        if (iframeEl) {
+          return iframeEl;
+        }
+
+        const player = getPlayer();
+        return player.shadowRoot.querySelector('iframe');
+      }
+
+      function setVisibilityState(state) {
+          const message = {
+            "app": "__AMPHTML__",
+            "requestid": 2,
+            "type": "q",
+            "name": "visibilitychange",
+            "data": {
+              "state": state
+            },
+            "rsvp": true
+          };
+          const iframe = getIframe();
+          iframe.contentWindow.postMessage(message, "*");
+      }
+
+      function init() {
+        const playerEl = getPlayer();
+
+        const bodyEl = document.body;
+        const closeEl = [...document.getElementsByClassName('close-button')][0];
+        const playerTrigger =
+            [...document.getElementsByClassName('player-trigger')][0];
+        // bodyEl.classList.toggle('player-open');
+
+        closeEl.addEventListener('click', () => {
+          bodyEl.classList.toggle('player-open');
+          const isOpen = bodyEl.classList.contains('player-open');
+          setVisibilityState(isOpen ? 'visible' : 'paused');
+        });
+
+        playerTrigger.addEventListener('click', () => {
+          bodyEl.classList.toggle('player-open', true);
+        })
+      }
+
+      window.addEventListener('load', init);
+    </script>
   </body>
 </html>
