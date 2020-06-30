@@ -1144,7 +1144,7 @@ export class AmpStory extends AMP.BaseElement {
     for (let i = 1; i <= 6; i++) {
       this.win.setTimeout(() => {
         this.performTapNavigation_(TapNavigationDirection.NEXT);
-        console.time('mytimer');
+        console.time('start-to-play-latency');
       }, i * 4000);
     }
   }
