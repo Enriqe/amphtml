@@ -1141,6 +1141,12 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
     });
+    for (let i = 1; i <= 6; i++) {
+      this.win.setTimeout(() => {
+        this.performTapNavigation_(TapNavigationDirection.NEXT);
+        console.time('mytimer');
+      }, i * 4000);
+    }
   }
 
   /**
@@ -2262,7 +2268,7 @@ export class AmpStory extends AMP.BaseElement {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach((pageId) => {
           const page = this.getPageById(pageId);
-          page.setDistance(distance);
+          page.setDistance(1000);
         });
       });
     });

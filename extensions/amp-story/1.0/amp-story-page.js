@@ -944,6 +944,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         () => {
           return mediaPool
             .play(/** @type {!./media-pool.DomElementDef} */ (mediaEl))
+            .then(() => {
+              console.timeEnd('start-to-play-latency');
+            })
             .catch((unusedError) => {
               // Auto playing the media failed, which could be caused by a data
               // saver, or a battery saving mode. Display a message so we can

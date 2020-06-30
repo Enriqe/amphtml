@@ -141,7 +141,8 @@ export class MediaPerformanceMetricsService {
    * @return {boolean}
    */
   isPerformanceTrackingOn() {
-    return this.performanceService_.isPerformanceTrackingOn();
+    // return this.performanceService_.isPerformanceTrackingOn();
+    return true;
   }
 
   /**
@@ -209,6 +210,7 @@ export class MediaPerformanceMetricsService {
    */
   sendMetrics_(mediaEntry) {
     const {media, metrics} = mediaEntry;
+    console.log('sendmetrics');
 
     let videoCacheState;
     if (this.urlService_.isProxyOrigin(media.currentSrc)) {
@@ -229,6 +231,7 @@ export class MediaPerformanceMetricsService {
 
     // If the media errored.
     if (metrics.error !== null) {
+      console.error(metrics.error);
       this.performanceService_.tickDelta(
         TickLabel.VIDEO_ERROR,
         metrics.error || 0
@@ -243,6 +246,7 @@ export class MediaPerformanceMetricsService {
       !metrics.jointLatency &&
       Date.now() - mediaEntry.timeStamps.start < MINIMUM_TIME_THRESHOLD_MS
     ) {
+      console.log('less than a second');
       return;
     }
 
@@ -253,6 +257,7 @@ export class MediaPerformanceMetricsService {
         5 /* Custom error code */
       );
       this.performanceService_.flush();
+      console.log('playback didnt start');
       return;
     }
 
@@ -282,6 +287,15 @@ export class MediaPerformanceMetricsService {
         Math.round(metrics.watchTime / metrics.rebuffers)
       );
     }
+    console.log('===============');
+    console.log(media.currentSrc);
+    console.log('VIDEO_JOINT_LATENCY', metrics.jointLatency);
+    console.log(
+      'VIDEO_MEAN_TIME_BETWEEN_REBUFFER',
+      Math.round(metrics.watchTime / metrics.rebuffers)
+    );
+    console.log('VIDEO_REBUFFER_RATE', rebufferRate);
+    console.log('VIDEO_REBUFFERS', metrics.rebuffers);
     this.performanceService_.flush();
   }
 
@@ -319,6 +333,9 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   getNewMediaEntry_(media, unlisteners) {
+    console.log('----');
+    console.log('newmedia entry, starting time start for joint latency');
+    console.log(media.currentSrc);
     return {
       media,
       status: Status.PAUSED,
