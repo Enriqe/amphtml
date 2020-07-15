@@ -225,7 +225,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     await manager.loadPlayers();
 
     swipeLeft();
-
+    //sdf
     win.requestAnimationFrame(() => {
       const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
       expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
