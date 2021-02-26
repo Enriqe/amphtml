@@ -364,7 +364,6 @@ export class AmpStoryPlayer {
   /** @public */
   buildCallback() {
     if (!!this.element_.isBuilt_) {
-      console.log('skipping');
       return;
     }
 
